@@ -1,0 +1,14 @@
+{
+  "name": "ballgame",
+  "version": "0.1.0",
+  "files": [
+    "ballgame_bg.wasm",
+    "ballgame.js",
+    "ballgame.d.ts"
+  ],
+  "module": "ballgame.js",
+  "types": "ballgame.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
