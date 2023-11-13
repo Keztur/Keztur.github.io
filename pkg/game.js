@@ -1,4 +1,4 @@
-import init, { run_sim, add_ball } from "../pkg/ballgame.js";
+import init, { run_sim, add_ball } from "./ballgame.js";
 const canvas = document.getElementById("myCanvas");
 const ctx = canvas.getContext("2d");
 let x_mouse = 0;
@@ -17,6 +17,7 @@ resizeCanvas();
 init().then(() => {
     setInterval(simulation, 10);
 });
+setTimeout(() => { var _a; return (_a = document.getElementById("hint")) === null || _a === void 0 ? void 0 : _a.remove(); }, 5000);
 // ### FUNCTIONS ######################################
 function simulation() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -45,9 +46,6 @@ function resizeCanvas() {
 window.addEventListener("keydown", (event) => {
     if (event.key === ' ') {
         add_ball();
-        // let xMouseVec = Math.random() * 30
-        // let yMouseVec = Math.random() * 30
-        // run_sim(xMouseVec, yMouseVec, width, height, ctx)
     }
 });
 // function drawCenter(color: string, x: number, y: number, size: number) {
