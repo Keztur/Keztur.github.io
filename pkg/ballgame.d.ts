@@ -6,8 +6,9 @@
 * @param {number} width
 * @param {number} height
 * @param {CanvasRenderingContext2D} context
+* @param {number} mode
 */
-export function run_sim(x_mouse_vec: number, y_mouse_vec: number, width: number, height: number, context: CanvasRenderingContext2D): void;
+export function run_sim(x_mouse_vec: number, y_mouse_vec: number, width: number, height: number, context: CanvasRenderingContext2D, mode: number): void;
 /**
 */
 export function add_ball(): void;
@@ -16,7 +17,7 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
   readonly memory: WebAssembly.Memory;
-  readonly run_sim: (a: number, b: number, c: number, d: number, e: number) => void;
+  readonly run_sim: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
   readonly add_ball: () => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;

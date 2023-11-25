@@ -189,10 +189,11 @@ function addBorrowedObject(obj) {
 * @param {number} width
 * @param {number} height
 * @param {CanvasRenderingContext2D} context
+* @param {number} mode
 */
-export function run_sim(x_mouse_vec, y_mouse_vec, width, height, context) {
+export function run_sim(x_mouse_vec, y_mouse_vec, width, height, context, mode) {
     try {
-        wasm.run_sim(x_mouse_vec, y_mouse_vec, width, height, addBorrowedObject(context));
+        wasm.run_sim(x_mouse_vec, y_mouse_vec, width, height, addBorrowedObject(context), mode);
     } finally {
         heap[stack_pointer++] = undefined;
     }
