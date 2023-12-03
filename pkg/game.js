@@ -7,7 +7,7 @@ let x_lastmouse = 0;
 let y_lastmouse = 0;
 let width = 10;
 let height = 10;
-let mode = 1; //1:bubbles, 2:rigid
+let mode = 2; //1:bubbles, 2:rigid
 resizeCanvas();
 // let field = [0, 0]
 // let forcePos = [{x: 314, y: 384}, {x: 628, y: 384}]
