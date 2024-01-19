@@ -5,9 +5,9 @@ const balls = []
 const ForceFields = []
 const rectangles = []
 const squares = []
-const ffRadius = 50
-const force = 0.1
+const force = 0.01
 let BallCount = 0
+const debug = true
 
 export function runSim (xMouseVec, yMouseVec, width, height, mode) {
   BallMove(xMouseVec, yMouseVec)
@@ -44,8 +44,8 @@ export function addBall () {
   BallCount++
 }
 
-export function addForceField (x, y) {
-  ForceFields.push(new ForceField(x, y))
+export function addForceField (x, y, radius) {
+  ForceFields.push(new ForceField(x, y, radius))
 }
 
 export function addRectangle (x, y, width, height) {
@@ -197,8 +197,7 @@ function ForceFieldsImpact () {
     for (let j = 0; j < BallCount; j++) {
       const ff = ForceFields[i]
       const ball = balls[j]
-
-      if ((ball.x - ff.x) ** 2 + (ball.y - ff.y) ** 2 < ffRadius ** 2) {
+      if ((ball.x - ff.x) ** 2 + (ball.y - ff.y) ** 2 < ff.radius ** 2) {
         ball.xVec += (ff.x - ball.x) * force
         ball.yVec += (ff.y - ball.y) * force
       }
@@ -222,7 +221,7 @@ function BallRectangleCollision () {
       const ny = Math.max(ry, Math.min(ry + rect.height, by))
 
       // skip if out of range
-      if ((bx - nx) ** 2 + (by - ny) ** 2 > ball.radius ** 2) {
+      if (!debug && (bx - nx) ** 2 + (by - ny) ** 2 > ball.radius ** 2) {
         continue
       }
 
@@ -234,6 +233,14 @@ function BallRectangleCollision () {
       const xvec = bx - nx
       const yvec = by - ny
       const amount = Math.hypot(xvec, yvec)
+
+      if (debug) {
+        drawBall(nx, ny, 3, 'red') // draw projection point
+        drawLine(nx, ny, nx + xvec / amount * 100, ny + yvec / amount * 100) // draw pointing vector
+        if ((bx - nx) ** 2 + (by - ny) ** 2 > ball.radius ** 2) {
+          continue
+        }
+      }
 
       // collision check
       if (amount <= ball.radius) {
@@ -292,7 +299,7 @@ function BallSquareCollision () {
       let ny = Math.max(ry, Math.min(ry + width, by))
 
       // skip if out of range
-      if ((bx - nx) ** 2 + (by - ny) ** 2 > ball.radius ** 2) {
+      if (!debug && (bx - nx) ** 2 + (by - ny) ** 2 > ball.radius ** 2) {
         continue
       }
 
@@ -303,12 +310,19 @@ function BallSquareCollision () {
       const nUpdate = EdgeCorrection(nx, ny, rx, ry, bx, by, edgeRadius, width)
       nx = nUpdate.x
       ny = nUpdate.y
-      // drawBall(nx, ny, 3, 'red') // draw projection point
 
       // Vector between closest position on rectangle and ball center ("pointing vector")
       const xvec = bx - nx
       const yvec = by - ny
       const amount = Math.hypot(xvec, yvec)
+
+      if (debug) {
+        drawBall(nx, ny, 3, 'red') // draw projection point
+        drawLine(nx, ny, nx + xvec / amount * 100, ny + yvec / amount * 100) // draw pointing vector
+        if ((bx - nx) ** 2 + (by - ny) ** 2 > ball.radius ** 2) {
+          continue
+        }
+      }
 
       // collision check
       if (amount <= ball.radius) {
@@ -376,12 +390,12 @@ function drawBall (x, y, radius, color) {
   ctx.closePath()
 }
 
-// function drawLine (xFrom, yFrom, xTo, yTo) {
-//   ctx.beginPath() // Start a new path
-//   ctx.moveTo(xFrom, yFrom) // Move the pen to (30, 50)
-//   ctx.lineTo(xTo, yTo) // Draw a line to (150, 100)
-//   ctx.stroke() // Render the path
-// }
+export function drawLine (xFrom, yFrom, xTo, yTo) {
+  ctx.beginPath() // Start a new path
+  ctx.moveTo(xFrom, yFrom) // Move the pen to (30, 50)
+  ctx.lineTo(xTo, yTo) // Draw a line to (150, 100)
+  ctx.stroke() // Render the path
+}
 
 function drawForceFields () {
   for (let i = 0; i < ForceFields.length; i++) {
@@ -393,12 +407,12 @@ function drawForceField (ff) {
   const x = ff.x
   const y = ff.y
 
-  const gradient = ctx.createRadialGradient(x, y, 0, x, y, ffRadius)
+  const gradient = ctx.createRadialGradient(x, y, 0, x, y, ff.radius)
   gradient.addColorStop(0, 'black')
   gradient.addColorStop(1, 'white')
 
   ctx.beginPath()
-  ctx.arc(x, y, 60, 0, 6.2813)
+  ctx.arc(x, y, ff.radius, 0, 6.2813)
   ctx.fillStyle = gradient
   ctx.fill()
   ctx.closePath()
