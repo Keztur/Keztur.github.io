@@ -7,7 +7,6 @@ const rectangles = []
 const squares = []
 const force = 0.01
 let BallCount = 0
-const debug = true
 
 export function runSim (xMouseVec, yMouseVec, width, height, mode) {
   BallMove(xMouseVec, yMouseVec)
@@ -390,12 +389,12 @@ function drawBall (x, y, radius, color) {
   ctx.closePath()
 }
 
-export function drawLine (xFrom, yFrom, xTo, yTo) {
-  ctx.beginPath() // Start a new path
-  ctx.moveTo(xFrom, yFrom) // Move the pen to (30, 50)
-  ctx.lineTo(xTo, yTo) // Draw a line to (150, 100)
-  ctx.stroke() // Render the path
-}
+// function drawLine (xFrom, yFrom, xTo, yTo) {
+//   ctx.beginPath() // Start a new path
+//   ctx.moveTo(xFrom, yFrom) // Move the pen to (30, 50)
+//   ctx.lineTo(xTo, yTo) // Draw a line to (150, 100)
+//   ctx.stroke() // Render the path
+// }
 
 function drawForceFields () {
   for (let i = 0; i < ForceFields.length; i++) {
