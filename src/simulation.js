@@ -1,5 +1,5 @@
 import { Ball, ForceField, Rectangle, Square } from './library.js'
-import { ctx } from './game.js'
+import { ctx, xMouse, yMouse, mousedown, drag } from './game.js'
 
 const balls = []
 const ForceFields = []
@@ -7,15 +7,25 @@ const rectangles = []
 const squares = []
 const force = 0.01
 let BallCount = 0
+let shading = false
 let debug = false
+let changelight = false
+const lightAngle = [-0.4, -0.4]
 
 function updateDebug (flag) {
   debug = flag
 }
 window.updateDebug = updateDebug
 
+function updateShading (flag) {
+  shading = flag
+}
+window.updateShading = updateShading
+
 export function runSim (xMouseVec, yMouseVec, width, height, mode) {
-  BallMove(xMouseVec, yMouseVec)
+  if (!drag && !changelight) {
+    BallMove(xMouseVec, yMouseVec)
+  }
   ForceFieldsImpact()
   BallBallCollision(mode)
   BallWallCollision(width, height)
@@ -23,9 +33,65 @@ export function runSim (xMouseVec, yMouseVec, width, height, mode) {
   BallSquareCollision()
 
   drawForceFields()
+  if (shading) {
+    drawBallShadows()
+  }
   drawBalls()
   drawRectangles()
   drawSquares()
+
+  if (shading) {
+    drawLightPicker()
+  }
+}
+
+function drawLightPicker () {
+  const radius = 40
+  const x = 50
+  const y = 200
+  let xOff = radius * lightAngle[0]
+  let yOff = radius * lightAngle[1]
+
+  if (mousedown && !drag) {
+    const vector = Math.hypot(xMouse - x, yMouse - y)
+
+    if (vector < radius) {
+      changelight = true
+    }
+
+    const xLimit = ((xMouse - x) / vector) * (radius - 10)
+    const yLimit = ((yMouse - y) / vector) * (radius - 10)
+
+    if (changelight) {
+      xOff = xMouse - x
+      yOff = yMouse - y
+
+      // limits movement range of yellow picker
+      if ((xOff > 0 && xOff > xLimit) || (xOff < 0 && xOff < xLimit)) {
+        xOff = xLimit
+      }
+      if ((yOff > 0 && yOff > yLimit) || (yOff < 0 && yOff < yLimit)) {
+        yOff = yLimit
+      }
+
+      lightAngle[0] = xOff / radius
+      lightAngle[1] = yOff / radius
+    }
+  } else {
+    changelight = false
+  }
+
+  ctx.beginPath()
+  ctx.arc(x, y, radius, 0, 6.2831)
+  ctx.fillStyle = 'grey'
+  ctx.fill()
+  ctx.closePath()
+
+  ctx.beginPath()
+  ctx.arc(x + xOff, y + yOff, 10, 0, 6.2831)
+  ctx.fillStyle = 'yellow'
+  ctx.fill()
+  ctx.closePath()
 }
 
 export function addBall () {
@@ -386,13 +452,55 @@ function drawBalls () {
     drawBall(balls[i].x, balls[i].y, balls[i].radius, balls[i].color)
   }
 }
+function drawBallShadows () {
+  for (let i = 0; i < BallCount; i++) {
+    drawBallShadow(balls[i].x, balls[i].y, balls[i].radius)
+  }
+}
+
+function drawBallShadow (x, y, radius) {
+  const offsetX = radius * -lightAngle[0] * 0.4
+  const offsetY = radius * -lightAngle[1] * 0.4
+  ctx.beginPath()
+  ctx.arc(x + offsetX, y + offsetY, radius, 0, 6.2831)
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+  ctx.fill()
+  ctx.closePath()
+}
 
 function drawBall (x, y, radius, color) {
   ctx.beginPath()
   ctx.arc(x, y, radius, 0, 6.2831)
-  ctx.fillStyle = color
+
+  if (shading) {
+    const offsetX = x + radius * lightAngle[0]
+    const offsetY = y + radius * lightAngle[1]
+    const gradient = ctx.createRadialGradient(offsetX, offsetY, 0, offsetX, offsetY, radius * 1.5)
+    gradient.addColorStop(1, shadeColor(color, -0.3))
+    gradient.addColorStop(0.2, shadeColor(color, 0.4))
+    gradient.addColorStop(0, shadeColor(color, 0.5))
+    ctx.fillStyle = gradient
+  } else {
+    ctx.fillStyle = color
+  }
+
   ctx.fill()
   ctx.closePath()
+}
+
+function shadeColor (color, factor) {
+  // convert rgb string to array: "rgb(11,123,1)" -> [11, 123, 1]
+  const rgb = color.match(/\d+/g).map(Number)
+
+  for (let i = 0; i < 3; i++) {
+    if (factor > 0) {
+      rgb[i] = Math.floor(rgb[i] + (255 - rgb[i]) * factor)
+    } else {
+      rgb[i] = Math.floor(rgb[i] + rgb[i] * factor)
+    }
+  }
+
+  return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`
 }
 
 export function drawLine (xFrom, yFrom, xTo, yTo) {
@@ -415,7 +523,7 @@ function drawForceField (ff) {
   const y = ff.y
 
   const gradient = ctx.createRadialGradient(x, y, 0, x, y, ff.radius)
-  gradient.addColorStop(0, 'black')
+  gradient.addColorStop(0, 'lightslategrey')
   gradient.addColorStop(1, 'white')
 
   ctx.beginPath()
